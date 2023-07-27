@@ -13,6 +13,7 @@ export class AccountTreeDataProvider implements vscode.TreeDataProvider<Account>
 
   async getChildren(element?: Account): Promise<Account[]> {
     const accounts: string[] = await api.wallet.list();
+    console.log(accounts);
     if (accounts.length === 0) {
       vscode.window.showInformationMessage("No Accounts in Ethcode");
       return [];

@@ -150,6 +150,16 @@
         "command": "sol-exec.selectNetwork",
         "title": "Select Network",
         "icon": "$(plug)"
+      },
+      {
+        "command": "sol-exec.exportAccount",
+        "title": "Export Account",
+        "icon": "$(triangle-up)"
+      },
+      {
+        "command": "sol-exec.importAccount",
+        "title": "Import Account",
+        "icon": "$(triangle-down)"
       }
     ],
     "menus": {
@@ -166,6 +176,16 @@
         },
         {
           "command": "sol-exec.selectNetwork",
+          "when": "view == sol-exec.account",
+          "group": "navigation"
+        },
+        {
+          "command": "sol-exec.exportAccount",
+          "when": "view == sol-exec.account",
+          "group": "navigation"
+        },
+        {
+          "command": "sol-exec.importAccount",
           "when": "view == sol-exec.account",
           "group": "navigation"
         }

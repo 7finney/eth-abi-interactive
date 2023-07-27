@@ -184,6 +184,12 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("sol-exec.createAccount", async () => {
       await vscode.commands.executeCommand("ethcode.account.create");
     }),
+    vscode.commands.registerCommand("sol-exec.exportAccount", async () => {
+      await vscode.commands.executeCommand("ethcode.account.export");
+    }),
+    vscode.commands.registerCommand("sol-exec.importAccount", async () => {
+      await vscode.commands.executeCommand("ethcode.account.import");
+    }),
     vscode.commands.registerCommand("sol-exec.useAccount", async (node: Account) => {
       console.log(node);
       STATE.currentAccount = node.label;
