@@ -139,9 +139,9 @@ export async function activate(context: vscode.ExtensionContext) {
     }),
     vscode.commands.registerCommand("sol-exec.deployContract", async (input: any) => {
       // channel.appendLine(`Deploying contract ${STATE.currentContract} ...`);
-      const contractAddress = await deployContract();
+      const contractAddress = await deployContract(channel);
       if (contractAddress) {
-        channel.appendLine(`${STATE.currentContract} contract deployed > ${contractAddress}`);
+        channel.appendLine(`Contract Address > ${contractAddress}`);
       } else {
         channel.appendLine(`${STATE.currentContract} contract deployment failed.`);
       }

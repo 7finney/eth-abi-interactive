@@ -66,8 +66,9 @@ const refreshContract = async (node: ContractTreeItem, contractTreeDataProvider:
     return vscode.window.createTreeView("sol-exec.contracts", { treeDataProvider: contractTreeDataProvider, });
 };
 
-const deployContract = async () => {
+const deployContract = async (channel: any) => {
     const provider = await api.provider.get();
+    const networkConfig = await api.provider.network.get();
     const wallet = await api.wallet.get(STATE.currentAccount);
     const compiledOutput = await vscode.workspace.findFiles(`**/${STATE.currentContract}.json`, '', 1);
     const abi = JSON.parse(fs.readFileSync(compiledOutput[0].fsPath, "utf8")).abi;
@@ -81,10 +82,24 @@ const deployContract = async () => {
         for (const ele of constructor) {
             param.push(ele.value);
         }
+        channel.appendLine(`${STATE.currentContract} Contract Deployment >`);
         contract = await factory.deploy(...param);
+        channel.appendLine(`Transaction Hash: ${contract.deployTransaction.hash}`);
+        channel.appendLine(`${networkConfig.blockScanner}/tx/${contract.deployTransaction.hash} `);
+        channel.appendLine(`Network: ${provider.network.name} | ${networkConfig.chainID} `);
+        console.log(networkConfig);
+        channel.appendLine(`Waiting for transaction to be mined...`);
+        console.log(contract);
         await contract.deployTransaction.wait();
     } catch (error: any) {
+        channel.appendLine(`${STATE.currentContract} Contract Deployment >`);
         contract = await factory.deploy();
+        channel.appendLine(`Transaction Hash: ${contract.deployTransaction.hash}`);
+        channel.appendLine(`${networkConfig.blockScanner}/tx/${contract.deployTransaction.hash} `);
+        channel.appendLine(`Network: ${provider.network.name} | ${networkConfig.chainID} `);
+        console.log(networkConfig);
+        channel.appendLine(`Waiting for transaction to be mined...`);
+        console.log(contract);
         await contract.deployTransaction.wait();
     }
     return contract?.address;
