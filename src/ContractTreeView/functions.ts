@@ -79,6 +79,7 @@ const deployContract = async (channel: any) => {
     let constructor;
     try {
         constructor = await api.contract.getConstructorInput(STATE.currentContract);
+        console.log(constructor);
         for (const ele of constructor) {
             param.push(ele.value);
         }

@@ -19,8 +19,10 @@ async function search(filePath: string, searchString: string, startLine: number 
 
 async function executeTransaction(contractAddress: string, abi: any[], wallet: Wallet, functionName: string, args: any[]) {
     const contract = new Contract(contractAddress, abi, wallet);
+    console.log(args);
     const tx = await contract[functionName](...args);
     const txResponse = await tx.wait();
+    // const txResponse = "in development";
     return txResponse;
 }
 
@@ -72,7 +74,7 @@ const sendTransaction = async (func: Abi, channel: vscode.OutputChannel) => {
         if (item.abi.value !== "") {
             // check if this is payable value
             if (!item.abi.name) {
-                functionArgs.push({ value: parseInt(item.abi.value) });
+                functionArgs.push({ value: ethers.utils.parseUnits(item.abi.value.toString(), item.abi.unit) });
             } else {
                 functionArgs.push(item.abi.value);
             }
