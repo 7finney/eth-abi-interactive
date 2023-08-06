@@ -36,7 +36,7 @@ export class ConstructorTreeDataProvider implements vscode.TreeDataProvider<Cons
     const leaves: Constructor[] = [];
     try {
       const constructorInputsEthcode: Array<any> = await api.contract.getConstructorInput(STATE.currentContract);
-        if (!element) {
+        if (!element && constructorInputsEthcode && constructorInputsEthcode.length > 0) {
           for (const entry of constructorInputsEthcode) {
               leaves.push(
                   new Constructor(
