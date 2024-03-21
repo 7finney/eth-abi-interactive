@@ -123,6 +123,7 @@ export async function activate(context: vscode.ExtensionContext) {
       sendTransaction(func, channel);
     }),
     vscode.commands.registerCommand('sol-exec.callContract', async (func: Abi) => {
+      channel.show(true);
       callContract(func, channel);
     }),
     vscode.commands.registerCommand('sol-exec.createTransaction', async (func: Abi) => {
@@ -137,11 +138,11 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("sol-exec.refreshContracts", async (node: ContractTreeItem) => {
       contractTreeView = await refreshContract(node, contractTreeDataProvider);
     }),
-    vscode.commands.registerCommand("sol-exec.deployContract", async (input: any) => {
-      // channel.appendLine(`Deploying contract ${STATE.currentContract} ...`);
+    vscode.commands.registerCommand("sol-exec.deployContract", async () => {
+      channel.show(true);
       const contractAddress = await deployContract(channel);
       if (contractAddress) {
-        channel.appendLine(`Contract Address > ${contractAddress}`);
+        channel.appendLine(`${STATE.currentContract} contract address > ${contractAddress}`);
       } else {
         channel.appendLine(`${STATE.currentContract} contract deployment failed.`);
       }
@@ -156,49 +157,49 @@ export async function activate(context: vscode.ExtensionContext) {
     }),
     // pending transaction 
     vscode.commands.registerCommand("sol-exec.simulate", async (input: any) => {
-      // channel.appendLine(`Simulating transaction ...`);
       await simulateTransactionJson(input, channel);
       pendingTransactionDataProvider.refresh();
     }),
     vscode.commands.registerCommand("sol-exec.decode", async (input: any) => {
-      // channel.appendLine(`Decoding transaction ...`);
       await decodeTransactionJson(input, channel);
       pendingTransactionDataProvider.refresh();
     }),
     vscode.commands.registerCommand("sol-exec.edit", async (input: any) => {
-      // channel.appendLine(`Editing transaction ...`);
       await editTransactionJson(input);
       pendingTransactionDataProvider.refresh();
     }),
     vscode.commands.registerCommand("sol-exec.send", async (input: any) => {
-      // channel.appendLine(`Sending transaction ...`);
       sendTransactionJson(input, channel);
       pendingTransactionDataProvider.refresh();
     }),
     vscode.commands.registerCommand("sol-exec.delete", async (input: any) => {
-      // channel.appendLine(`Deleting transaction ...`);
       deleteTransactionJson(input);
       pendingTransactionDataProvider.refresh();
     }),
     // account
     vscode.commands.registerCommand("sol-exec.createAccount", async () => {
+      channel.show(true);
       await vscode.commands.executeCommand("ethcode.account.create");
     }),
     vscode.commands.registerCommand("sol-exec.exportAccount", async () => {
+      channel.show(true);
       await vscode.commands.executeCommand("ethcode.account.export");
     }),
     vscode.commands.registerCommand("sol-exec.importAccount", async () => {
+      channel.show(true);
       await vscode.commands.executeCommand("ethcode.account.import");
     }),
     vscode.commands.registerCommand("sol-exec.useAccount", async (node: Account) => {
-      console.log(node);
+      channel.show(true);
       STATE.currentAccount = node.label;
       updateMsg(accountTreeView);
     }),
     vscode.commands.registerCommand("sol-exec.copyAccountAddress", async (node: any) => {
+      channel.show(true);
       vscode.env.clipboard.writeText(node.label);
     }),
     vscode.commands.registerCommand("sol-exec.selectNetwork", async () => {
+      channel.show(true);
       await vscode.commands.executeCommand("ethcode.network.select");
     }),
   );

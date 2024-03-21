@@ -79,32 +79,26 @@ const deployContract = async (channel: any) => {
     let constructor;
     try {
         constructor = await api.contract.getConstructorInput(STATE.currentContract);
-        console.log(constructor);
         for (const ele of constructor) {
             param.push(ele.value);
         }
-        channel.appendLine(`${STATE.currentContract} Contract Deployment >`);
-        contract = await factory.deploy(...param);
+        channel.appendLine(`Deploy ${STATE.currentContract} contract >`);
+        if (networkConfig.chainID === 59140) {
+            // If Linea fetch gas price from API
+            const { maxFeePerGas, maxPriorityFeePerGas } = await api.provider.network.getGasPrices();
+            contract = await factory.deploy(...param, { maxFeePerGas, maxPriorityFeePerGas });
+        } else {
+            contract = await factory.deploy(...param);
+        }
         channel.appendLine(`Transaction Hash: ${contract.deployTransaction.hash}`);
         channel.appendLine(`${networkConfig.blockScanner}/tx/${contract.deployTransaction.hash} `);
-        channel.appendLine(`Network: ${provider.network.name} | ${networkConfig.chainID} `);
-        console.log(networkConfig);
         channel.appendLine(`Waiting for transaction to be mined...`);
-        console.log(contract);
         await contract.deployTransaction.wait();
     } catch (error: any) {
-        channel.appendLine(`${STATE.currentContract} Contract Deployment >`);
-        contract = await factory.deploy();
-        channel.appendLine(`Transaction Hash: ${contract.deployTransaction.hash}`);
-        channel.appendLine(`${networkConfig.blockScanner}/tx/${contract.deployTransaction.hash} `);
-        channel.appendLine(`Network: ${provider.network.name} | ${networkConfig.chainID} `);
-        console.log(networkConfig);
-        channel.appendLine(`Waiting for transaction to be mined...`);
-        console.log(contract);
-        await contract.deployTransaction.wait();
+        console.error(error);
+        channel.appendLine(`Error: Deploying ${STATE.currentContract} contract > ${error.message}`);
     }
     return contract?.address;
-
 };
 
 const editContractAddress = async (input : any) => {
