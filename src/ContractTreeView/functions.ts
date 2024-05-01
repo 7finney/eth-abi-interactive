@@ -67,7 +67,6 @@ const refreshContract = async (node: ContractTreeItem, contractTreeDataProvider:
 };
 
 const deployContract = async (channel: any) => {
-    const provider = await api.provider.get();
     const networkConfig = await api.provider.network.get();
     const wallet = await api.wallet.get(STATE.currentAccount);
     const compiledOutput = await vscode.workspace.findFiles(`**/${STATE.currentContract}.json`, '', 1);
@@ -83,22 +82,39 @@ const deployContract = async (channel: any) => {
             param.push(ele.value);
         }
         channel.appendLine(`Deploy ${STATE.currentContract} contract >`);
-        if (networkConfig.chainID === 59140) {
-            // If Linea fetch gas price from API
-            const { maxFeePerGas, maxPriorityFeePerGas } = await api.provider.network.getGasPrices();
-            contract = await factory.deploy(...param, { maxFeePerGas, maxPriorityFeePerGas });
-        } else {
-            contract = await factory.deploy(...param);
+        channel.appendLine(`ChainID: ${parseInt(networkConfig.chainID) === 137 ? "Matic" : "Others"}`);
+        const { maxFeePerGas, maxPriorityFeePerGas } = await api.provider.network.getGasPrices();
+        channel.appendLine(`Gas Price: ${maxFeePerGas.toString()} Gwei`);
+        channel.appendLine(`Priority Fee: ${maxPriorityFeePerGas.toString()} Gwei`);
+        switch (parseInt(networkConfig.chainID)) {
+            case 137: {
+                channel.appendLine(`Using Matic deployment`);
+                const { maxFeePerGas, maxPriorityFeePerGas } = await api.provider.network.getGasPrices();
+                contract = await factory.deploy(...param, { maxFeePerGas, maxPriorityFeePerGas });
+                break;
+            }
+            case 59140: {
+                channel.appendLine(`Using Linea deployment`);
+                const { maxFeePerGas, maxPriorityFeePerGas } = await api.provider.network.getGasPrices();
+                contract = await factory.deploy(...param, { maxFeePerGas, maxPriorityFeePerGas });
+                break;
+            }
+            default: {
+                channel.appendLine(`Using default deployment`);
+                contract = await factory.deploy(...param);
+                break;
+            }
         }
         channel.appendLine(`Transaction Hash: ${contract.deployTransaction.hash}`);
         channel.appendLine(`${networkConfig.blockScanner}/tx/${contract.deployTransaction.hash} `);
         channel.appendLine(`Waiting for transaction to be mined...`);
         await contract.deployTransaction.wait();
+        return contract.address;
     } catch (error: any) {
         console.error(error);
         channel.appendLine(`Error: Deploying ${STATE.currentContract} contract > ${error.message}`);
+        return "";
     }
-    return contract?.address;
 };
 
 const editContractAddress = async (input : any) => {
