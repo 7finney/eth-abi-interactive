@@ -212,6 +212,7 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() { }
+
 function fetch(apiURL: string) {
   throw new Error("Function not implemented.");
 }

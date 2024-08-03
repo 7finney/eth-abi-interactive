@@ -3,7 +3,6 @@ import { Abi } from "./AbiTreeDataProvider";
 import * as vscode from "vscode";
 import * as fs from "fs";
 import { Contract, Wallet, ethers } from "ethers";
-import { Signer } from "@ethersproject/abstract-signer";
 import path from "path";
 import { read } from "../PendingTransactionTreeView/functions";
 const ethcodeExtension: any = vscode.extensions.getExtension("7finney.ethcode");
@@ -19,11 +18,9 @@ async function search(filePath: string, searchString: string, startLine: number 
 
 async function executeTransaction(contractAddress: string, abi: any[], wallet: Wallet, functionName: string, args: any[]) {
     const contract = new Contract(contractAddress, abi, wallet);
+    console.log(`Executing contract function ${functionName} with args`);
     console.log(args);
-    const tx = await contract[functionName](...args);
-    const txResponse = await tx.wait();
-    // const txResponse = "in development";
-    return txResponse;
+    return await contract.functions[functionName](...args);
 }
 
 async function callContractFunction(contractAddress: string, abi: any[], functionName: string, args: any[]) {
@@ -52,6 +49,7 @@ const editInput = async (input: Abi, abiTreeDataProvider: any) => {
 
 const sendTransaction = async (func: Abi, channel: vscode.OutputChannel) => {
     channel.appendLine(`${func.abi.name}:${func.abi.stateMutability} > `);
+    const networkConfig = await api.provider.network.get();
     const functionName = func.abi.name;
     const totalArgsCount = func.children.length;
     let countArgs = 0;
@@ -62,19 +60,21 @@ const sendTransaction = async (func: Abi, channel: vscode.OutputChannel) => {
     const abi = await api.contract.abi(STATE.currentContract);
 
     const contractAddress = await api.contract.getContractAddress(STATE.currentContract);
+    channel.appendLine(`Selected contract > ${STATE.currentContract}`);
 
     if (contractAddress === "") {
         channel.appendLine(`${STATE.currentContract} contract address not available. Please deploy this contract first.`);
         return;
     }
 
+    const { maxFeePerGas, maxPriorityFeePerGas } = await api.provider.network.getGasPrices();
     // execute the selected function
     const functionArgs: any = [];
     func.children.forEach((item: Abi) => {
         if (item.abi.value !== "") {
             // check if this is payable value
             if (!item.abi.name) {
-                functionArgs.push({ value: ethers.utils.parseUnits(item.abi.value.toString(), item.abi.unit) });
+                functionArgs.push({ value: ethers.utils.parseUnits(item.abi.value.toString(), item.abi.unit), maxFeePerGas, maxPriorityFeePerGas });
             } else {
                 functionArgs.push(item.abi.value);
             }
@@ -89,8 +89,10 @@ const sendTransaction = async (func: Abi, channel: vscode.OutputChannel) => {
         return;
     }
 
-    executeTransaction(contractAddress, abi, wallet, func.abi.name, functionArgs).then((txResponse: any) => {
-        channel.appendLine(`Transaction hash > ${txResponse.transactionHash}`);
+    executeTransaction(contractAddress, abi, wallet, func.abi.name, functionArgs).then(async (transaction: any) => {
+        channel.appendLine(`${networkConfig.blockScanner}/tx/${transaction.hash}`);
+        const txResponse = await transaction.wait();
+        channel.appendLine(`Transaction mined in block ${txResponse.blockNumber}`);
     }).catch((err: any) => {
         console.error(err);
         channel.appendLine(`Error > ${err}`);
