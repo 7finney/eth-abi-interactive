@@ -82,25 +82,33 @@ const deployContract = async (channel: any) => {
             param.push(ele.value);
         }
         channel.appendLine(`Deploy ${STATE.currentContract} contract >`);
-        channel.appendLine(`ChainID: ${parseInt(networkConfig.chainID) === 137 ? "Matic" : "Others"}`);
-        const { maxFeePerGas, maxPriorityFeePerGas } = await api.provider.network.getGasPrices();
-        channel.appendLine(`Gas Price: ${maxFeePerGas.toString()} Gwei`);
-        channel.appendLine(`Priority Fee: ${maxPriorityFeePerGas.toString()} Gwei`);
         switch (parseInt(networkConfig.chainID)) {
             case 137: {
-                channel.appendLine(`Using Matic deployment`);
+                channel.appendLine(`Calculating gas prices for Matic deployment...`);
                 const { maxFeePerGas, maxPriorityFeePerGas } = await api.provider.network.getGasPrices();
+                channel.appendLine(`Gas Price: ${maxFeePerGas.toString()} Gwei`);
+                channel.appendLine(`Priority Fee: ${maxPriorityFeePerGas.toString()} Gwei`);
                 contract = await factory.deploy(...param, { maxFeePerGas, maxPriorityFeePerGas });
                 break;
             }
             case 59140: {
-                channel.appendLine(`Using Linea deployment`);
+                channel.appendLine(`Calculating gas prices for Linea deployment...`);
                 const { maxFeePerGas, maxPriorityFeePerGas } = await api.provider.network.getGasPrices();
+                channel.appendLine(`Gas Price: ${maxFeePerGas.toString()} Gwei`);
+                channel.appendLine(`Priority Fee: ${maxPriorityFeePerGas.toString()} Gwei`);
+                contract = await factory.deploy(...param, { maxFeePerGas, maxPriorityFeePerGas });
+                break;
+            }
+            case 80002: {
+                channel.appendLine(`Calculating gas prices for Amoy deployment...`);
+                const { maxFeePerGas, maxPriorityFeePerGas } = await api.provider.network.getGasPrices();
+                channel.appendLine(`Gas Price: ${maxFeePerGas.toString()} Gwei`);
+                channel.appendLine(`Priority Fee: ${maxPriorityFeePerGas.toString()} Gwei`);
                 contract = await factory.deploy(...param, { maxFeePerGas, maxPriorityFeePerGas });
                 break;
             }
             default: {
-                channel.appendLine(`Using default deployment`);
+                channel.appendLine(`Using default gas prices`);
                 contract = await factory.deploy(...param);
                 break;
             }

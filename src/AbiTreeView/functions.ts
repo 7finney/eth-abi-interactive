@@ -17,21 +17,10 @@ async function search(filePath: string, searchString: string, startLine: number 
 }
 
 async function executeTransaction(contractAddress: string, abi: any[], wallet: Wallet, functionName: string, args: any[]) {
-    const networkConfig = await api.provider.network.get();
     const contract = new Contract(contractAddress, abi, wallet);
-    switch (parseInt(networkConfig.chainID)) {
-        case 137: {
-            const { maxFeePerGas, maxPriorityFeePerGas } = await api.provider.network.getGasPrices();
-            return await contract[functionName].call(...args, { maxFeePerGas, maxPriorityFeePerGas });
-        }
-        case 59140: {
-            const { maxFeePerGas, maxPriorityFeePerGas } = await api.provider.network.getGasPrices();
-            return await contract[functionName].call(...args, { maxFeePerGas, maxPriorityFeePerGas });
-        }
-        default: {
-            return await contract[functionName](...args);
-        }
-    }
+    console.log(`Executing contract function ${functionName} with args`);
+    console.log(args);
+    return await contract.functions[functionName](...args);
 }
 
 async function callContractFunction(contractAddress: string, abi: any[], functionName: string, args: any[]) {
@@ -78,13 +67,14 @@ const sendTransaction = async (func: Abi, channel: vscode.OutputChannel) => {
         return;
     }
 
+    const { maxFeePerGas, maxPriorityFeePerGas } = await api.provider.network.getGasPrices();
     // execute the selected function
     const functionArgs: any = [];
     func.children.forEach((item: Abi) => {
         if (item.abi.value !== "") {
             // check if this is payable value
             if (!item.abi.name) {
-                functionArgs.push({ value: ethers.utils.parseUnits(item.abi.value.toString(), item.abi.unit) });
+                functionArgs.push({ value: ethers.utils.parseUnits(item.abi.value.toString(), item.abi.unit), maxFeePerGas, maxPriorityFeePerGas });
             } else {
                 functionArgs.push(item.abi.value);
             }
