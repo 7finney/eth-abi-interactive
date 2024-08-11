@@ -7,7 +7,7 @@ const api: any = ethcodeExtension.exports;
 
 export { Abi } from './AbiTreeItem';
 export class AbiTreeDataProvider implements TreeDataProvider<Abi> {
-  constructor(private workspaceRoot: string | undefined) {}
+  constructor() {}
 
   getTreeItem(element: Abi): TreeItem {
     return element;

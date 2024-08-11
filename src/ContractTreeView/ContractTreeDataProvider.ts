@@ -6,13 +6,13 @@ const api: any = ethcodeExtension.exports;
 export class ContractTreeDataProvider
   implements vscode.TreeDataProvider<Contract>
 {
-  constructor(private workspaceRoot: string | undefined) {}
+  constructor() {}
 
   getTreeItem(element: Contract): vscode.TreeItem {
     return element;
   }
 
-  async getChildren(element?: Contract): Promise<Contract[]> {
+  async getChildren(): Promise<Contract[]> {
     const contracts: string[] = await api.contract.list();
     if (contracts.length === 0) {
       vscode.window.showInformationMessage("No Contracts in empty workspace");
