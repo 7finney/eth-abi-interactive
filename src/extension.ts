@@ -7,20 +7,9 @@ import { callContract, create, editInput, sendTransaction } from "./AbiTreeView/
 import { deployContract, editContractAddress, refreshContract, updateContractAddress, useContract } from "./ContractTreeView/functions";
 import { ConstructorTreeDataProvider } from "./ConstructorTreeView/ConstructorTreeDataProvider";
 import { editConstructorInput } from "./ConstructorTreeView/functions";
-// import { read } from "./PendingTransactionTreeView/functions";
-import fs from 'fs';
-import path from 'path';
 import { decodeTransactionJson, deleteTransactionJson, editTransactionJson, sendTransactionJson, simulateTransactionJson } from "./PendingTransactionTreeView/functions";
-import { send } from "process";
 import { Account, AccountTreeDataProvider } from "./AccountTreeView/AccountTreeDataProvider";
-import { ethers } from "ethers";
 import { updateMsg } from "./AccountTreeView/funtions";
-// const settings = {
-//   apiKey: "",
-//   network: Network.ETH_MAINNET,
-// };
-
-// const alchemy = new Alchemy(settings);
 
 const ethcodeExtension: any = vscode.extensions.getExtension("7finney.ethcode");
 const api: any = ethcodeExtension.exports;
@@ -50,9 +39,7 @@ export async function activate(context: vscode.ExtensionContext) {
     accountTreeView.message = `${STATE.currentAccount} | ${api.provider.network.get()}`;
   }
   // Contract Tree View
-  const contractTreeDataProvider = new ContractTreeDataProvider(
-    vscode.workspace.workspaceFolders?.[0].uri.fsPath
-  );
+  const contractTreeDataProvider = new ContractTreeDataProvider();
 
   let contractTreeView = vscode.window.createTreeView("sol-exec.contracts", {
     treeDataProvider: contractTreeDataProvider,
@@ -65,9 +52,7 @@ export async function activate(context: vscode.ExtensionContext) {
   });
 
   // Abi Tree View
-  const abiTreeDataProvider = new AbiTreeDataProvider(
-    vscode.workspace.workspaceFolders?.[0].uri.fsPath
-  );
+  const abiTreeDataProvider = new AbiTreeDataProvider();
   const abiTreeView = vscode.window.createTreeView("sol-exec.abis", {
     treeDataProvider: abiTreeDataProvider,
   });
